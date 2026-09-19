@@ -196,7 +196,6 @@
   .board { min-height: 120px; }
 </style>
 
-
 </head>
 <body>
 <div class="wrap">
@@ -225,18 +224,6 @@
     Задания хранятся в файле homework.json в репозитории и читаются при каждом открытии страницы, поэтому запись видна сразу. Записывать может только староста — со своим токеном GitHub; у остальных доска открыта на чтение.
   </footer>
 </div>
-
-<dialog id="loginDlg">
-  <h2>Вход старосты</h2>
-  <p>Пароль открывает форму записи заданий. Остальные продолжают читать доску без пароля.</p>
-  <input type="password" id="pwd" placeholder="Пароль" autocomplete="current-password">
-  <p class="err" id="pwdErr" hidden>Неверный пароль</p>
-  <div class="edit-row" style="margin-top:16px; justify-content:flex-end">
-    <button type="button" class="btn" id="cancelLogin">Отмена</button>
-    <button type="button" class="btn primary" id="doLogin">Войти</button>
-  </div>
-</dialog>
-
 
 <dialog id="loginDlg">
   <h2>Вход старосты</h2>
