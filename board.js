@@ -2,6 +2,7 @@
   var REPO = "Seinokojii/mukr-homework";
   var FILE = "homework.json";
   var API = "https://api.github.com/repos/" + REPO + "/contents/" + FILE;
+  var RAW = "https://raw.githubusercontent.com/" + REPO + "/main/" + FILE;
 
   var SUBJECTS = [
     { id: "informatika",   name: "Информатика",   full: "Инновационная информатика" },
@@ -88,31 +89,43 @@
     return new TextDecoder().decode(bytes);
   }
 
+  // Чтение идёт с raw.githubusercontent — там нет лимита на число запросов,
+  // поэтому доску может одновременно открывать сколько угодно человек.
+  // GitHub API вызывается только при записи (и для получения sha старостой).
   function load() {
+    return fetch(RAW + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("http " + r.status);
+        return r.json();
+      })
+      .then(function (parsed) {
+        state = parsed && parsed.subjects ? parsed : { subjects: {}, updated: null };
+        render();
+      })
+      .catch(function () {
+        // запасной путь — файл, отданный самим Pages
+        return fetch(FILE + "?t=" + Date.now(), { cache: "no-store" })
+          .then(function (r) { return r.json(); })
+          .then(function (parsed) {
+            state = parsed && parsed.subjects ? parsed : { subjects: {}, updated: null };
+            render();
+          })
+          .catch(function () {
+            render();
+            toast("Не удалось загрузить задания");
+          });
+      });
+  }
+
+  // sha нужен только тому, кто пишет: запрашивается один раз, при входе
+  function refreshSha() {
+    if (!token) return Promise.resolve();
     return fetch(API + "?ref=main&t=" + Date.now(), {
       cache: "no-store",
-      headers: { Accept: "application/vnd.github+json" }
-    }).then(function (r) {
-      if (!r.ok) throw new Error("http " + r.status);
-      return r.json();
-    }).then(function (data) {
-      sha = data.sha;
-      var parsed = JSON.parse(b64decode(data.content));
-      state = parsed && parsed.subjects ? parsed : { subjects: {}, updated: null };
-      render();
-    }).catch(function () {
-      // запасной путь — файл, отданный самим Pages
-      return fetch(FILE + "?t=" + Date.now(), { cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (parsed) {
-          state = parsed && parsed.subjects ? parsed : { subjects: {}, updated: null };
-          render();
-        })
-        .catch(function () {
-          render();
-          toast("Не удалось загрузить задания");
-        });
-    });
+      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d) sha = d.sha; })
+      .catch(function () {});
   }
 
   function save(id, text, due) {
@@ -160,7 +173,7 @@
         setEditor(null);
       } else if (e && e.kind === "conflict") {
         toast("Кто-то записал раньше — перечитываю");
-        load();
+        load().then(refreshSha);
       } else {
         toast("Не удалось сохранить");
       }
@@ -408,5 +421,5 @@
   }
 
   render();
-  load();
+  load().then(refreshSha);
 })();
