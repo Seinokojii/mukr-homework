@@ -1,24 +1,4 @@
 {
-  "subjects": {
-    "russkiy": {
-      "text": "Проверка удаления вложений",
-      "due": "",
-      "updated": 1789838959737,
-      "files": [
-        {
-          "path": "files/russkiy/1789838956877-test-photo.jpg",
-          "name": "test-photo.jpg",
-          "type": "image/jpeg",
-          "size": 199452
-        },
-        {
-          "path": "files/russkiy/1789838958654-test-doc.txt",
-          "name": "test-doc.txt",
-          "type": "text/plain",
-          "size": 1520
-        }
-      ]
-    }
-  },
-  "updated": 1789838959736
+  "subjects": {},
+  "updated": 1789838974481
 }
