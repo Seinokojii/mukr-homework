@@ -120,19 +120,41 @@
       });
   }
 
-  // sha нужен только тому, кто пишет: запрашивается один раз, при входе
-  function refreshSha() {
-    if (!token) return Promise.resolve();
+  // Пишущему нужны и версия файла, и АКТУАЛЬНОЕ содержимое — строго из одного
+  // ответа API. raw отстаёт на минуты: если взять состояние оттуда, а версию
+  // отсюда, своя запись затрёт чужую свежую (так пропала запись по математике).
+  function refreshFromApi(quiet) {
+    if (!token) return Promise.resolve(false);
     return fetch(API + "?ref=main&t=" + Date.now(), {
       cache: "no-store",
       headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
     }).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { if (d) sha = d.sha; })
-      .catch(function () {});
+      .then(function (d) {
+        if (!d) return false;
+        sha = d.sha;
+        try {
+          var parsed = JSON.parse(b64decode(d.content));
+          if (parsed && parsed.subjects) {
+            state = parsed;
+            if (!quiet) render();
+          }
+        } catch (e) {}
+        return true;
+      })
+      .catch(function () { return false; });
   }
 
-  function save(id, text, due, atts) {
+  function save(id, text, due, atts, retried) {
     if (saving) return;
+    saving = true;
+    // берём свежее состояние с сервера и кладём свою запись поверх него
+    refreshFromApi(true).then(function () {
+      saving = false;
+      writeRecord(id, text, due, atts, retried);
+    });
+  }
+
+  function writeRecord(id, text, due, atts, retried) {
     var next = { subjects: {}, updated: Date.now() };
     SUBJECTS.forEach(function (s) {
       if (state.subjects[s.id]) next.subjects[s.id] = state.subjects[s.id];
@@ -146,7 +168,7 @@
     }
 
     var payload = {
-      message: clean ? "Задание: " + id : "Убрано задание: " + id,
+      message: (clean || atts.length) ? "Задание: " + id : "Убрано задание: " + id,
       content: b64encode(JSON.stringify(next, null, 2) + "\n"),
       branch: "main"
     };
@@ -179,8 +201,15 @@
         toast("Токен не принят: нужен доступ Contents: write");
         setEditor(null);
       } else if (e && e.kind === "conflict") {
-        toast("Кто-то записал раньше — перечитываю");
-        load().then(refreshSha);
+        if (!retried) {
+          toast("Кто-то записал раньше — повторяю поверх свежей версии");
+          refreshFromApi().then(function () {
+            writeRecord(id, text, due, atts, true);
+          });
+        } else {
+          toast("Не удалось сохранить: доску изменили одновременно");
+          refreshFromApi();
+        }
       } else {
         toast("Не удалось сохранить");
       }
@@ -689,5 +718,5 @@
   }
 
   render();
-  load().then(refreshSha);
+  load().then(function () { return refreshFromApi(); });
 })();
