@@ -57,8 +57,8 @@
     },
     "matematika": {
       "text": "конспект",
-      "due": "",
-      "updated": 1789839583870,
+      "due": "2026-09-22",
+      "updated": 1789841088594,
       "files": [
         {
           "path": "files/matematika/1789839576476-IMG_0312.jpg",
@@ -87,5 +87,5 @@
       ]
     }
   },
-  "updated": 1789841010077
+  "updated": 1789841088594
 }
