@@ -265,13 +265,16 @@
     });
   }
 
-  function deleteFile(path) {
+  // Удаление файла. GitHub отвечает 409, если в ветку пишет что-то ещё,
+  // поэтому при конфликте пробуем ещё раз со свежим sha.
+  function deleteFile(path, attempt) {
     var url = "https://api.github.com/repos/" + REPO + "/contents/" + path;
-    return fetch(url + "?ref=main", {
+    return fetch(url + "?ref=main&t=" + Date.now(), {
+      cache: "no-store",
       headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
     }).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (!d) return;
+        if (!d) return null;
         return fetch(url, {
           method: "DELETE",
           headers: {
@@ -280,8 +283,14 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({ message: "Убрано вложение", sha: d.sha, branch: "main" })
+        }).then(function (r) {
+          if ((r.status === 409 || r.status === 422) && !attempt) {
+            return new Promise(function (res) { setTimeout(res, 1200); })
+              .then(function () { return deleteFile(path, 1); });
+          }
+          return null;
         });
-      }).catch(function () {});
+      }).catch(function () { return null; });
   }
 
   function fileUrl(path) {
@@ -329,9 +338,15 @@
     });
 
     function finish(atts) {
-      toRemove.forEach(deleteFile);
-      dropped[id] = [];
-      save(id, text, due, atts);
+      // последовательно: параллельные записи в одну ветку дают 409
+      var chain = Promise.resolve();
+      toRemove.forEach(function (path) {
+        chain = chain.then(function () { return deleteFile(path); });
+      });
+      chain.then(function () {
+        dropped[id] = [];
+        save(id, text, due, atts);
+      });
     }
   }
 
