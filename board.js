@@ -189,7 +189,7 @@
 
 
   // --- вложения --------------------------------------------------------------
-  var MAX_DOC = 5 * 1024 * 1024;   // 5 МБ на документ
+  var MAX_DOC = 25 * 1024 * 1024;  // 25 МБ: выше ~37 МБ GitHub отклоняет запрос (base64 +33%)
   var IMG_SIDE = 1600;             // длинная сторона фото после сжатия
 
   function fileToDataParts(file) {
@@ -310,7 +310,9 @@
     }
 
     saving = true;
-    toast(parts.length === 1 ? "Загружаю файл…" : "Загружаю файлы…");
+    var heavy = parts.reduce(function (n, p) { return n + p.bytes.length; }, 0) > 8 * 1024 * 1024;
+    toast(heavy ? "Загружаю, файлы крупные — это займёт до минуты…"
+                : (parts.length === 1 ? "Загружаю файл…" : "Загружаю файлы…"));
     var chain = Promise.resolve([]);
     parts.forEach(function (part) {
       chain = chain.then(function (acc) {
@@ -494,7 +496,7 @@
               render();
             })
             .catch(function (e) {
-              if (e && e.kind === "too-big") toast("Файл «" + e.name + "» больше 5 МБ");
+              if (e && e.kind === "too-big") toast("Файл «" + e.name + "» больше 25 МБ");
               else toast("Не удалось прочитать файл");
             });
         };
