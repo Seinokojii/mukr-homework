@@ -95,8 +95,10 @@
   // Чтение идёт с raw.githubusercontent — там нет лимита на число запросов,
   // поэтому доску может одновременно открывать сколько угодно человек.
   // GitHub API вызывается только при записи (и для получения sha старостой).
+  // Быстрый показ: файл со своего домена (он же работает там, где raw закрыт).
+  // Свежесть добирает refreshFromApi сразу после этого.
   function load() {
-    return fetch(RAW + "?t=" + Date.now(), { cache: "no-store" })
+    return fetch(FILE + "?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) {
         if (!r.ok) throw new Error("http " + r.status);
         return r.json();
@@ -106,8 +108,7 @@
         render();
       })
       .catch(function () {
-        // запасной путь — файл, отданный самим Pages
-        return fetch(FILE + "?t=" + Date.now(), { cache: "no-store" })
+        return fetch(RAW + "?t=" + Date.now(), { cache: "no-store" })
           .then(function (r) { return r.json(); })
           .then(function (parsed) {
             state = parsed && parsed.subjects ? parsed : { subjects: {}, updated: null };
@@ -323,7 +324,13 @@
       }).catch(function () { return null; });
   }
 
+  // Файл отдаёт сам сайт — тот же домен, что и страница. У части пользователей
+  // raw.githubusercontent заблокирован провайдером, и картинки не грузились.
   function fileUrl(path) {
+    return path + "?t=" + Date.now();
+  }
+  // запасной адрес: свежезагруженный файл появляется на сайте через ~минуту
+  function fileUrlFallback(path) {
     return "https://raw.githubusercontent.com/" + REPO + "/main/" + path;
   }
 
@@ -594,9 +601,14 @@
             if (isImage(f)) {
               a.className = "thumb";
               var im = document.createElement("img");
-              im.src = fileUrl(f.path);
               im.alt = f.name;
               im.loading = "lazy";
+              im.onerror = function () {
+                if (im.dataset.fallback) return;
+                im.dataset.fallback = "1";
+                im.src = fileUrlFallback(f.path);
+              };
+              im.src = fileUrl(f.path);
               a.appendChild(im);
             } else {
               a.className = "att doc";
