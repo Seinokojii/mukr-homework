@@ -124,20 +124,21 @@
   // ответа API. raw отстаёт на минуты: если взять состояние оттуда, а версию
   // отсюда, своя запись затрёт чужую свежую (так пропала запись по математике).
   function refreshFromApi(quiet) {
-    if (!token) return Promise.resolve(false);
-    return fetch(API + "?ref=main&t=" + Date.now(), {
-      cache: "no-store",
-      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
-    }).then(function (r) { return r.ok ? r.json() : null; })
+    var headers = { Accept: "application/vnd.github+json" };
+    if (token) headers.Authorization = "Bearer " + token;
+    return fetch(API + "?ref=main&t=" + Date.now(), { cache: "no-store", headers: headers })
+      .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d) return false;
-        sha = d.sha;
+        if (token) sha = d.sha;
         try {
           var parsed = JSON.parse(b64decode(d.content));
-          if (parsed && parsed.subjects) {
-            state = parsed;
-            if (!quiet) render();
-          }
+          if (!parsed || !parsed.subjects) return false;
+          var changed = JSON.stringify(parsed.subjects) !== JSON.stringify(state.subjects);
+          state = parsed;
+          // не перерисовываем поверх открытого редактора — иначе пропадёт набранный текст
+          var editing = Object.keys(open).some(function (k) { return open[k]; });
+          if (!quiet && changed && !editing) render();
         } catch (e) {}
         return true;
       })
@@ -718,5 +719,11 @@
   }
 
   render();
+  // сначала кеш (мгновенно и без лимитов), следом сверка с актуальным
   load().then(function () { return refreshFromApi(); });
+
+  // вернулись на вкладку — проверяем, не появилось ли новое
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) refreshFromApi();
+  });
 })();
