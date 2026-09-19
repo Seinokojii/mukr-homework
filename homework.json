@@ -1,91 +1,11 @@
 {
   "subjects": {
-    "matematika": {
-      "text": "конспект",
-      "due": "",
-      "updated": 1789839583870,
-      "files": [
-        {
-          "path": "files/matematika/1789839576476-IMG_0312.jpg",
-          "name": "IMG_0312.jpg",
-          "type": "image/jpeg",
-          "size": 274984
-        },
-        {
-          "path": "files/matematika/1789839578664-IMG_0313.jpg",
-          "name": "IMG_0313.jpg",
-          "type": "image/jpeg",
-          "size": 180914
-        },
-        {
-          "path": "files/matematika/1789839580664-IMG_0314.jpg",
-          "name": "IMG_0314.jpg",
-          "type": "image/jpeg",
-          "size": 202572
-        },
-        {
-          "path": "files/matematika/1789839582349-IMG_0315.jpg",
-          "name": "IMG_0315.jpg",
-          "type": "image/jpeg",
-          "size": 163870
-        }
-      ]
-    },
     "informatika": {
-      "text": "",
-      "due": "",
-      "updated": 1789839663288,
-      "files": [
-        {
-          "path": "files/informatika/1789839648464-IMG_0316.jpg",
-          "name": "IMG_0316.jpg",
-          "type": "image/jpeg",
-          "size": 339017
-        },
-        {
-          "path": "files/informatika/1789839650770-IMG_0317.jpg",
-          "name": "IMG_0317.jpg",
-          "type": "image/jpeg",
-          "size": 358045
-        },
-        {
-          "path": "files/informatika/1789839652451-IMG_0318.jpg",
-          "name": "IMG_0318.jpg",
-          "type": "image/jpeg",
-          "size": 353468
-        },
-        {
-          "path": "files/informatika/1789839654284-IMG_0319.jpg",
-          "name": "IMG_0319.jpg",
-          "type": "image/jpeg",
-          "size": 376748
-        },
-        {
-          "path": "files/informatika/1789839656145-IMG_0320.jpg",
-          "name": "IMG_0320.jpg",
-          "type": "image/jpeg",
-          "size": 387922
-        },
-        {
-          "path": "files/informatika/1789839658091-IMG_0321.jpg",
-          "name": "IMG_0321.jpg",
-          "type": "image/jpeg",
-          "size": 393561
-        },
-        {
-          "path": "files/informatika/1789839659932-IMG_0322.jpg",
-          "name": "IMG_0322.jpg",
-          "type": "image/jpeg",
-          "size": 353183
-        },
-        {
-          "path": "files/informatika/1789839661646-IMG_0323.jpg",
-          "name": "IMG_0323.jpg",
-          "type": "image/jpeg",
-          "size": 280160
-        }
-      ]
+      "text": "Дз ниче на дано",
+      "due": "2026-09-24",
+      "updated": 1789839696160,
+      "files": []
     }
   },
-  "updated": 1789839663288
+  "updated": 1789839696160
 }
