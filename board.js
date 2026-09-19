@@ -522,7 +522,11 @@
           var del = document.createElement("button");
           del.className = "btn danger";
           del.textContent = "Убрать";
-          del.onclick = function () { commit(s.id, "", "", []); };
+          del.onclick = function () {
+            // снимаем и сами файлы, иначе они останутся в репозитории
+            dropped[s.id] = ((rec && rec.files) || []).map(function (f) { return f.path; });
+            commit(s.id, "", "", []);
+          };
           r2.appendChild(del);
         }
         col.appendChild(r2);
