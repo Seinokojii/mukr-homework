@@ -85,7 +85,20 @@
           "size": 163870
         }
       ]
+    },
+    "fizika": {
+      "text": "Проверка запасного пути — уберу",
+      "due": "",
+      "updated": 1789842127942,
+      "files": [
+        {
+          "path": "files/fizika/1789842125741-fresh.jpg",
+          "name": "fresh.jpg",
+          "type": "image/jpeg",
+          "size": 73222
+        }
+      ]
     }
   },
-  "updated": 1789841219738
+  "updated": 1789842127942
 }
