@@ -1,9 +1,9 @@
 {
   "subjects": {
     "informatika": {
-      "text": "Дз ниче на дано",
+      "text": "конспект",
       "due": "2026-09-24",
-      "updated": 1789839696160,
+      "updated": 1789840184006,
       "files": [
         {
           "path": "files/informatika/1789839648464-IMG_0316.jpg",
@@ -87,5 +87,5 @@
       ]
     }
   },
-  "updated": 1789840093992
+  "updated": 1789840184006
 }
