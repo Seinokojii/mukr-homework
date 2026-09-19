@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Что задали — МУКР</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Oswald:wght@500;600&display=swap">
+<style>
+  :root {
+    --bg: #F5F6F8;
+    --surface: #FFFFFF;
+    --ink: #14213D;
+    --ink-2: #5A6480;
+    --line: #DFE2EA;
+    --line-strong: #14213D;
+    --coral: #E5533D;
+    --coral-soft: #FCEBE7;
+    --ok: #2E7D5B;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1220;
+      --surface: #161B2D;
+      --ink: #E9ECF5;
+      --ink-2: #99A2BC;
+      --line: #262D44;
+      --line-strong: #E9ECF5;
+      --coral: #FF7A63;
+      --coral-soft: #2A1A18;
+      --ok: #6FC49B;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1220;
+    --surface: #161B2D;
+    --ink: #E9ECF5;
+    --ink-2: #99A2BC;
+    --line: #262D44;
+    --line-strong: #E9ECF5;
+    --coral: #FF7A63;
+    --coral-soft: #2A1A18;
+    --ok: #6FC49B;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding-inline: 18px; padding-block: 28px 56px; }
+
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--line-strong);
+  }
+  .title-block { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 {
+    font-family: Oswald, "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: clamp(30px, 7vw, 46px);
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    margin: 0;
+    line-height: .95;
+  }
+  .group-tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: .1em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+
+  .icon-btn {
+    font: inherit; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 999px; padding: 7px 14px;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .icon-btn:hover { border-color: var(--coral); color: var(--coral); }
+  .icon-btn.on { background: var(--coral); border-color: var(--coral); color: #fff; }
+  svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  :focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+
+  .bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding: 12px 0 0;
+  }
+  .next {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .next b { color: var(--coral); font-weight: 500; }
+  .filters { display: flex; gap: 6px; }
+
+  .board { margin-top: 18px; border-top: 1px solid var(--line); }
+  .row {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 18px;
+    padding: 16px 4px;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .row.active { background: var(--surface); }
+  .subj { display: flex; flex-direction: column; gap: 2px; }
+  .subj .name {
+    font-family: Oswald, sans-serif;
+    font-size: 19px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    font-weight: 500;
+  }
+  .row.active .subj .name { color: var(--coral); }
+  .subj .full { font-size: 12px; color: var(--ink-2); }
+
+  .body-col { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+  .task { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .none { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: .03em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--coral-soft);
+    color: var(--coral);
+    white-space: nowrap;
+  }
+  .chip.plain { background: transparent; color: var(--ink-2); padding-inline: 0; }
+
+  textarea, input[type="date"] {
+    font: inherit; width: 100%;
+    color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  }
+  textarea { min-height: 78px; resize: vertical; }
+  .edit-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .edit-row label { font-size: 12.5px; color: var(--ink-2); font-family: "IBM Plex Mono", monospace; }
+  .btn {
+    font: inherit; cursor: pointer; font-size: 13.5px;
+    border-radius: 8px; padding: 8px 14px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .btn:hover { border-color: var(--coral); color: var(--coral); }
+  .btn.primary { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .btn.primary:hover { filter: brightness(1.15); color: var(--bg); }
+  .btn.danger:hover { border-color: var(--coral); color: var(--coral); }
+
+  dialog {
+    border: 1px solid var(--line); border-radius: 14px;
+    background: var(--surface); color: var(--ink);
+    padding: 24px; max-width: 350px; width: calc(100% - 32px);
+  }
+  dialog::backdrop { background: rgba(8,11,20,.5); }
+  dialog h2 { font-family: Oswald, sans-serif; text-transform: uppercase; letter-spacing: .03em; margin: 0 0 6px; font-size: 21px; }
+  dialog p { margin: 0 0 14px; color: var(--ink-2); font-size: 13.5px; }
+  dialog input { font: inherit; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  .err { color: var(--coral); font-size: 13px; margin: 10px 0 0; font-family: "IBM Plex Mono", monospace; }
+
+  .toast {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px; font-size: 13.5px; z-index: 30;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  }
+  footer {
+    margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-2); max-width: 64ch;
+  }
+
+  @media (max-width: 620px) {
+    .row { grid-template-columns: 1fr; gap: 8px; padding-block: 14px; }
+    .subj { flex-direction: row; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  a { color: var(--coral); }
+  .board { min-height: 120px; }
+</style>
+
+
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="title-block">
+      <h1>Что задали</h1>
+      <span class="group-tag">МУКР · доска группы</span>
+    </div>
+    <button class="icon-btn" id="loginBtn">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <span id="loginLabel">Староста</span>
+    </button>
+  </header>
+
+  <div class="bar">
+    <div class="next" id="next">Записей пока нет</div>
+    <div class="filters">
+      <button class="icon-btn on" id="fAll">Все предметы</button>
+      <button class="icon-btn" id="fTask">С заданием</button>
+    </div>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <footer id="foot">
+    Задания хранятся в файле homework.json в репозитории и читаются при каждом открытии страницы, поэтому запись видна сразу. Записывать может только староста — со своим токеном GitHub; у остальных доска открыта на чтение.
+  </footer>
+</div>
+
+<dialog id="loginDlg">
+  <h2>Вход старосты</h2>
+  <p>Пароль открывает форму записи заданий. Остальные продолжают читать доску без пароля.</p>
+  <input type="password" id="pwd" placeholder="Пароль" autocomplete="current-password">
+  <p class="err" id="pwdErr" hidden>Неверный пароль</p>
+  <div class="edit-row" style="margin-top:16px; justify-content:flex-end">
+    <button type="button" class="btn" id="cancelLogin">Отмена</button>
+    <button type="button" class="btn primary" id="doLogin">Войти</button>
+  </div>
+</dialog>
+
+
+<dialog id="loginDlg">
+  <h2>Вход старосты</h2>
+  <p>Вставьте personal access token GitHub с правом Contents: Read and write на этот репозиторий. Токен сохранится только в этом браузере.</p>
+  <input type="password" id="pwd" placeholder="github_pat_..." autocomplete="off">
+  <p class="err" id="pwdErr" hidden>Токен не подошёл</p>
+  <p style="margin-top:12px"><a id="tokenLink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Создать токен</a></p>
+  <div class="edit-row" style="margin-top:12px; justify-content:flex-end">
+    <button type="button" class="btn" id="cancelLogin">Отмена</button>
+    <button type="button" class="btn primary" id="doLogin">Войти</button>
+  </div>
+</dialog>
+
+<script src="board.js"></script>
+</body>
+</html>
