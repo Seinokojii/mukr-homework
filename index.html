@@ -194,6 +194,33 @@
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   a { color: var(--coral); }
   .board { min-height: 120px; }
+
+  /* вложения */
+  .att-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .att {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px;
+    padding: 4px 8px; border-radius: 6px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
+    max-width: 100%; overflow-wrap: anywhere;
+  }
+  .att.new { border-style: dashed; border-color: var(--coral); color: var(--coral); }
+  .att-x {
+    border: 0; background: none; cursor: pointer; color: inherit;
+    font-size: 15px; line-height: 1; padding: 0 2px;
+  }
+  .att-x:hover { color: var(--coral); }
+
+  .att-view { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+  .att-view .thumb {
+    display: block; width: 88px; height: 88px;
+    border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--line); background: var(--bg);
+  }
+  .att-view .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .att-view .thumb:hover { border-color: var(--coral); }
+  .att.doc { text-decoration: none; }
+  .att.doc:hover { border-color: var(--coral); color: var(--coral); }
 </style>
 
 </head>

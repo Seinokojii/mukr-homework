@@ -24,6 +24,8 @@
   var onlyTasks = false;
   var open = {};
   var saving = false;
+  var pending = {};   // выбранные, ещё не загруженные файлы: {subjectId: [part]}
+  var dropped = {};   // вложения, помеченные к удалению: {subjectId: [path]}
 
   try { token = sessionStorage.getItem("hw-token"); } catch (e) {}
 
@@ -37,9 +39,10 @@
   var PENCIL = '<path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path>';
   var CHECK = '<path d="M20 6 9 17l-5-5"></path>';
   var PLUS = '<path d="M12 5v14"></path><path d="M5 12h14"></path>';
+  var CLIP = '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>';
 
   function icon(p) { return '<svg viewBox="0 0 24 24">' + p + "</svg>"; }
-  function has(rec) { return !!(rec && rec.text && rec.text.trim()); }
+  function has(rec) { return !!(rec && ((rec.text && rec.text.trim()) || (rec.files && rec.files.length))); }
 
   function fmtDate(iso) {
     if (!iso) return "";
@@ -128,15 +131,19 @@
       .catch(function () {});
   }
 
-  function save(id, text, due) {
+  function save(id, text, due, atts) {
     if (saving) return;
     var next = { subjects: {}, updated: Date.now() };
     SUBJECTS.forEach(function (s) {
       if (state.subjects[s.id]) next.subjects[s.id] = state.subjects[s.id];
     });
     var clean = (text || "").trim();
-    if (clean) next.subjects[id] = { text: clean, due: due || "", updated: Date.now() };
-    else delete next.subjects[id];
+    atts = atts || [];
+    if (clean || atts.length) {
+      next.subjects[id] = { text: clean, due: due || "", updated: Date.now(), files: atts };
+    } else {
+      delete next.subjects[id];
+    }
 
     var payload = {
       message: clean ? "Задание: " + id : "Убрано задание: " + id,
@@ -178,6 +185,152 @@
         toast("Не удалось сохранить");
       }
     }).then(function () { saving = false; });
+  }
+
+
+  // --- вложения --------------------------------------------------------------
+  var MAX_DOC = 5 * 1024 * 1024;   // 5 МБ на документ
+  var IMG_SIDE = 1600;             // длинная сторона фото после сжатия
+
+  function fileToDataParts(file) {
+    // фото ужимаем, остальное берём как есть
+    if (/^image\//.test(file.type) && file.type !== "image/gif") {
+      return shrinkImage(file);
+    }
+    if (file.size > MAX_DOC) {
+      return Promise.reject({ kind: "too-big", name: file.name });
+    }
+    return file.arrayBuffer().then(function (buf) {
+      return { name: file.name, type: file.type || "application/octet-stream", bytes: new Uint8Array(buf) };
+    });
+  }
+
+  function shrinkImage(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function () {
+        var scale = Math.min(1, IMG_SIDE / Math.max(img.width, img.height));
+        var cv = document.createElement("canvas");
+        cv.width = Math.round(img.width * scale);
+        cv.height = Math.round(img.height * scale);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        cv.toBlob(function (blob) {
+          URL.revokeObjectURL(url);
+          if (!blob) { reject({ kind: "image" }); return; }
+          blob.arrayBuffer().then(function (buf) {
+            resolve({
+              name: file.name.replace(/\.[^.]+$/, "") + ".jpg",
+              type: "image/jpeg",
+              bytes: new Uint8Array(buf)
+            });
+          });
+        }, "image/jpeg", 0.82);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject({ kind: "image" }); };
+      img.src = url;
+    });
+  }
+
+  function bytesToB64(bytes) {
+    var bin = "", chunk = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(bin);
+  }
+
+  function safeName(name) {
+    return name.replace(/[^\w.\-]+/g, "_").slice(-60);
+  }
+
+  function uploadFile(subjectId, part) {
+    var path = "files/" + subjectId + "/" + Date.now() + "-" + safeName(part.name);
+    var url = "https://api.github.com/repos/" + REPO + "/contents/" + path;
+    return fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer " + token,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "Вложение: " + subjectId,
+        content: bytesToB64(part.bytes),
+        branch: "main"
+      })
+    }).then(function (r) {
+      if (!r.ok) throw { kind: "upload", name: part.name };
+      return { path: path, name: part.name, type: part.type, size: part.bytes.length };
+    });
+  }
+
+  function deleteFile(path) {
+    var url = "https://api.github.com/repos/" + REPO + "/contents/" + path;
+    return fetch(url + "?ref=main", {
+      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        return fetch(url, {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer " + token,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message: "Убрано вложение", sha: d.sha, branch: "main" })
+        });
+      }).catch(function () {});
+  }
+
+  function fileUrl(path) {
+    return "https://raw.githubusercontent.com/" + REPO + "/main/" + path;
+  }
+
+  function humanSize(n) {
+    if (n < 1024) return n + " Б";
+    if (n < 1024 * 1024) return Math.round(n / 1024) + " КБ";
+    return (n / 1024 / 1024).toFixed(1) + " МБ";
+  }
+
+  function isImage(att) { return /^image\//.test(att.type || ""); }
+
+
+  // Сохранение с вложениями: сначала файлы в репозиторий, затем сама запись
+  function commit(id, text, due, keepFiles) {
+    if (saving) return;
+    var parts = pending[id] || [];
+    var toRemove = (dropped[id] || []).slice();
+    var base = (keepFiles || []).slice();
+
+    if (!parts.length) {
+      finish(base);
+      return;
+    }
+
+    saving = true;
+    toast(parts.length === 1 ? "Загружаю файл…" : "Загружаю файлы…");
+    var chain = Promise.resolve([]);
+    parts.forEach(function (part) {
+      chain = chain.then(function (acc) {
+        return uploadFile(id, part).then(function (att) { return acc.concat([att]); });
+      });
+    });
+    chain.then(function (uploaded) {
+      saving = false;
+      pending[id] = [];
+      finish(base.concat(uploaded));
+    }).catch(function (e) {
+      saving = false;
+      toast("Не удалось загрузить «" + ((e && e.name) || "файл") + "»");
+    });
+
+    function finish(atts) {
+      toRemove.forEach(deleteFile);
+      dropped[id] = [];
+      save(id, text, due, atts);
+    }
   }
 
   function setEditor(t) {
@@ -283,23 +436,93 @@
         r1.appendChild(due);
         col.appendChild(r1);
 
+        // уже прикреплённые файлы
+        var keep = ((rec && rec.files) || []).filter(function (f) {
+          return (dropped[s.id] || []).indexOf(f.path) < 0;
+        });
+        if (keep.length || (pending[s.id] || []).length) {
+          var list = document.createElement("div");
+          list.className = "att-list";
+          keep.forEach(function (f) {
+            var chip = document.createElement("span");
+            chip.className = "att";
+            chip.appendChild(document.createTextNode(f.name + " · " + humanSize(f.size)));
+            var x = document.createElement("button");
+            x.className = "att-x";
+            x.type = "button";
+            x.title = "Убрать файл";
+            x.textContent = "×";
+            x.onclick = function () {
+              (dropped[s.id] = dropped[s.id] || []).push(f.path);
+              render();
+            };
+            chip.appendChild(x);
+            list.appendChild(chip);
+          });
+          (pending[s.id] || []).forEach(function (part, i) {
+            var chip = document.createElement("span");
+            chip.className = "att new";
+            chip.appendChild(document.createTextNode(part.name + " · " + humanSize(part.bytes.length)));
+            var x = document.createElement("button");
+            x.className = "att-x";
+            x.type = "button";
+            x.title = "Убрать файл";
+            x.textContent = "×";
+            x.onclick = function () { pending[s.id].splice(i, 1); render(); };
+            chip.appendChild(x);
+            list.appendChild(chip);
+          });
+          col.appendChild(list);
+        }
+
+        var rf = document.createElement("div");
+        rf.className = "edit-row";
+        var pick = document.createElement("input");
+        pick.type = "file";
+        pick.id = "file-" + s.id;
+        pick.multiple = true;
+        pick.accept = "image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt";
+        pick.hidden = true;
+        pick.onchange = function () {
+          var files = [...pick.files];
+          pick.value = "";
+          if (!files.length) return;
+          toast("Готовлю файлы…");
+          Promise.all(files.map(fileToDataParts))
+            .then(function (parts) {
+              pending[s.id] = (pending[s.id] || []).concat(parts);
+              render();
+            })
+            .catch(function (e) {
+              if (e && e.kind === "too-big") toast("Файл «" + e.name + "» больше 5 МБ");
+              else toast("Не удалось прочитать файл");
+            });
+        };
+        var pickBtn = document.createElement("button");
+        pickBtn.className = "btn";
+        pickBtn.innerHTML = icon(CLIP) + "Прикрепить файл";
+        pickBtn.onclick = function () { pick.click(); };
+        rf.appendChild(pick);
+        rf.appendChild(pickBtn);
+        col.appendChild(rf);
+
         var r2 = document.createElement("div");
         r2.className = "edit-row";
         var saveBtn = document.createElement("button");
         saveBtn.className = "btn primary";
         saveBtn.innerHTML = icon(CHECK) + "Сохранить";
-        saveBtn.onclick = function () { save(s.id, ta.value, due.value); };
+        saveBtn.onclick = function () { commit(s.id, ta.value, due.value, keep); };
         var cancel = document.createElement("button");
         cancel.className = "btn";
         cancel.textContent = "Отмена";
-        cancel.onclick = function () { open[s.id] = false; render(); };
+        cancel.onclick = function () { pending[s.id] = []; dropped[s.id] = []; open[s.id] = false; render(); };
         r2.appendChild(saveBtn);
         r2.appendChild(cancel);
         if (active) {
           var del = document.createElement("button");
           del.className = "btn danger";
           del.textContent = "Убрать";
-          del.onclick = function () { save(s.id, "", ""); };
+          del.onclick = function () { commit(s.id, "", "", []); };
           r2.appendChild(del);
         }
         col.appendChild(r2);
@@ -308,6 +531,30 @@
         if (active) { bodyP.className = "task"; bodyP.textContent = rec.text; }
         else { bodyP.className = "none"; bodyP.textContent = "ничего не задано"; }
         col.appendChild(bodyP);
+
+        if (active && rec.files && rec.files.length) {
+          var gallery = document.createElement("div");
+          gallery.className = "att-view";
+          rec.files.forEach(function (f) {
+            var a = document.createElement("a");
+            a.href = fileUrl(f.path);
+            a.target = "_blank";
+            a.rel = "noopener";
+            if (isImage(f)) {
+              a.className = "thumb";
+              var im = document.createElement("img");
+              im.src = fileUrl(f.path);
+              im.alt = f.name;
+              im.loading = "lazy";
+              a.appendChild(im);
+            } else {
+              a.className = "att doc";
+              a.textContent = f.name + " · " + humanSize(f.size);
+            }
+            gallery.appendChild(a);
+          });
+          col.appendChild(gallery);
+        }
 
         var chips = document.createElement("div");
         chips.className = "chips";
@@ -327,7 +574,7 @@
           var ed = document.createElement("button");
           ed.className = "btn";
           ed.innerHTML = icon(active ? PENCIL : PLUS) + (active ? "Изменить" : "Записать");
-          ed.onclick = function () { open[s.id] = true; render(); };
+          ed.onclick = function () { pending[s.id] = []; dropped[s.id] = []; open[s.id] = true; render(); };
           chips.appendChild(ed);
         }
         if (chips.children.length) col.appendChild(chips);
