@@ -227,11 +227,10 @@
 
 <dialog id="loginDlg">
   <h2>Вход старосты</h2>
-  <p>Вставьте personal access token GitHub с правом Contents: Read and write на этот репозиторий. Токен сохранится только в этом браузере.</p>
-  <input type="password" id="pwd" placeholder="github_pat_..." autocomplete="off">
-  <p class="err" id="pwdErr" hidden>Токен не подошёл</p>
-  <p style="margin-top:12px"><a id="tokenLink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Создать токен</a></p>
-  <div class="edit-row" style="margin-top:12px; justify-content:flex-end">
+  <p>Пароль открывает форму записи заданий. Остальные читают доску без пароля.</p>
+  <input type="password" id="pwd" placeholder="Пароль" autocomplete="current-password">
+  <p class="err" id="pwdErr" hidden>Неверный пароль</p>
+  <div class="edit-row" style="margin-top:16px; justify-content:flex-end">
     <button type="button" class="btn" id="cancelLogin">Отмена</button>
     <button type="button" class="btn primary" id="doLogin">Войти</button>
   </div>

@@ -24,7 +24,7 @@
   var open = {};
   var saving = false;
 
-  try { token = localStorage.getItem("hw-token"); } catch (e) {}
+  try { token = sessionStorage.getItem("hw-token"); } catch (e) {}
 
   var board = document.getElementById("board");
   var nextEl = document.getElementById("next");
@@ -170,11 +170,47 @@
   function setEditor(t) {
     token = t;
     try {
-      if (t) localStorage.setItem("hw-token", t);
-      else localStorage.removeItem("hw-token");
+      if (t) sessionStorage.setItem("hw-token", t);
+      else sessionStorage.removeItem("hw-token");
     } catch (e) {}
     open = {};
     render();
+  }
+
+  // --- пароль -> зашифрованный токен ---------------------------------------
+  function fromB64(b64) {
+    var bin = atob(b64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function unlock(password) {
+    return fetch("token.enc?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw { kind: "no-file" };
+        return r.json();
+      })
+      .then(function (box) {
+        var enc = new TextEncoder();
+        return crypto.subtle
+          .importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"])
+          .then(function (base) {
+            return crypto.subtle.deriveKey(
+              { name: "PBKDF2", salt: fromB64(box.salt), iterations: box.iter || 200000, hash: "SHA-256" },
+              base,
+              { name: "AES-GCM", length: 256 },
+              false,
+              ["decrypt"]
+            );
+          })
+          .then(function (key) {
+            return crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(box.iv) }, key, fromB64(box.ct));
+          })
+          .then(function (buf) {
+            return new TextDecoder().decode(buf).trim();
+          });
+      });
   }
 
   function render() {
@@ -341,22 +377,34 @@
   });
 
   function tryLogin() {
-    var candidate = (pwd.value || "").trim();
-    if (!candidate) { pwdErr.hidden = false; return; }
+    var password = (pwd.value || "").trim();
+    if (!password) { showPwdError("Введите пароль"); return; }
     pwdErr.hidden = true;
-    fetch(API + "?ref=main", {
-      headers: { Authorization: "Bearer " + candidate, Accept: "application/vnd.github+json" }
-    }).then(function (r) {
-      if (!r.ok) throw new Error("bad");
-      return r.json();
-    }).then(function (data) {
-      sha = data.sha;
-      dlg.close();
-      setEditor(candidate);
-      toast("Режим записи включён");
-    }).catch(function () {
-      pwdErr.hidden = false;
-    });
+
+    unlock(password)
+      .then(function (secret) {
+        return fetch(API + "?ref=main", {
+          headers: { Authorization: "Bearer " + secret, Accept: "application/vnd.github+json" }
+        }).then(function (r) {
+          if (!r.ok) throw { kind: "token" };
+          return r.json();
+        }).then(function (data) {
+          sha = data.sha;
+          dlg.close();
+          setEditor(secret);
+          toast("Режим записи включён");
+        });
+      })
+      .catch(function (e) {
+        if (e && e.kind === "no-file") showPwdError("Запись ещё не настроена: нет файла token.enc");
+        else if (e && e.kind === "token") showPwdError("Ключ устарел — нужно перевыпустить токен");
+        else showPwdError("Неверный пароль");
+      });
+  }
+
+  function showPwdError(msg) {
+    pwdErr.textContent = msg;
+    pwdErr.hidden = false;
   }
 
   render();
