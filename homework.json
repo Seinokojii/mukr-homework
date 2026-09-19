@@ -1,4 +1,24 @@
 {
-  "subjects": {},
-  "updated": 1789837773575
+  "subjects": {
+    "grafika": {
+      "text": "Проверка вложений — задание и файлы будут убраны",
+      "due": "",
+      "updated": 1789838298743,
+      "files": [
+        {
+          "path": "files/grafika/1789838295884-test-photo.jpg",
+          "name": "test-photo.jpg",
+          "type": "image/jpeg",
+          "size": 199452
+        },
+        {
+          "path": "files/grafika/1789838297717-test-doc.txt",
+          "name": "test-doc.txt",
+          "type": "text/plain",
+          "size": 1520
+        }
+      ]
+    }
+  },
+  "updated": 1789838298743
 }
