@@ -1,9 +1,9 @@
 {
   "subjects": {
     "informatika": {
-      "text": "конспект",
+      "text": "конспект смерть",
       "due": "2026-09-24",
-      "updated": 1789840248181,
+      "updated": 1789841108789,
       "files": [
         {
           "path": "files/informatika/1789839648464-IMG_0316.jpg",
@@ -87,5 +87,5 @@
       ]
     }
   },
-  "updated": 1789841088594
+  "updated": 1789841108789
 }
