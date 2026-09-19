@@ -1,18 +1,4 @@
 {
-  "subjects": {
-    "matlogika": {
-      "text": "Проверка крупного документа — будет убрано",
-      "due": "",
-      "updated": 1789838720130,
-      "files": [
-        {
-          "path": "files/matlogika/1789838710986-big-doc.txt",
-          "name": "big-doc.txt",
-          "type": "text/plain",
-          "size": 14418000
-        }
-      ]
-    }
-  },
-  "updated": 1789838720130
+  "subjects": {},
+  "updated": 1789838774840
 }
