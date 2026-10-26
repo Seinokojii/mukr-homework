@@ -1,36 +1,4 @@
 {
-  "subjects": {
-    "matematika": {
-      "text": "конспект повеситься сразу",
-      "due": "2026-09-22",
-      "updated": 1789841219738,
-      "files": [
-        {
-          "path": "files/matematika/1789839576476-IMG_0312.jpg",
-          "name": "IMG_0312.jpg",
-          "type": "image/jpeg",
-          "size": 274984
-        },
-        {
-          "path": "files/matematika/1789839578664-IMG_0313.jpg",
-          "name": "IMG_0313.jpg",
-          "type": "image/jpeg",
-          "size": 180914
-        },
-        {
-          "path": "files/matematika/1789839580664-IMG_0314.jpg",
-          "name": "IMG_0314.jpg",
-          "type": "image/jpeg",
-          "size": 202572
-        },
-        {
-          "path": "files/matematika/1789839582349-IMG_0315.jpg",
-          "name": "IMG_0315.jpg",
-          "type": "image/jpeg",
-          "size": 163870
-        }
-      ]
-    }
-  },
-  "updated": 1792990159001
+  "subjects": {},
+  "updated": 1792990210583
 }
