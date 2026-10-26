@@ -3,9 +3,16 @@
     "informatika": {
       "text": "конспект",
       "due": "2026-10-31",
-      "updated": 1792990238680,
-      "files": []
+      "updated": 1792990254896,
+      "files": [
+        {
+          "path": "files/informatika/1792990252510-_1_.jpg",
+          "name": "Снимок экрана (1).jpg",
+          "type": "image/jpeg",
+          "size": 110991
+        }
+      ]
     }
   },
-  "updated": 1792990238680
+  "updated": 1792990254896
 }
