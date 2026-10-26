@@ -1,4 +1,11 @@
 {
-  "subjects": {},
-  "updated": 1792990210583
+  "subjects": {
+    "informatika": {
+      "text": "конспект",
+      "due": "2026-10-31",
+      "updated": 1792990238680,
+      "files": []
+    }
+  },
+  "updated": 1792990238680
 }
