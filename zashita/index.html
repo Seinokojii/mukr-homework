@@ -14,20 +14,19 @@
     --line: #DFE2EA;
     --coral: #E5533D;
     --coral-soft: #FCEBE7;
-    --ok: #2E7D5B;
     --backdrop: #E4E7EE;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #0E1220; --surface: #161B2D; --ink: #E9ECF5; --ink-2: #99A2BC;
-      --line: #262D44; --coral: #FF7A63; --coral-soft: #2A1A18; --ok: #6FC49B;
+      --line: #262D44; --coral: #FF7A63; --coral-soft: #2A1A18;
       --backdrop: #080B14; color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0E1220; --surface: #161B2D; --ink: #E9ECF5; --ink-2: #99A2BC;
-    --line: #262D44; --coral: #FF7A63; --coral-soft: #2A1A18; --ok: #6FC49B;
+    --line: #262D44; --coral: #FF7A63; --coral-soft: #2A1A18;
     --backdrop: #080B14; color-scheme: dark;
   }
 
@@ -37,11 +36,10 @@
     background: var(--backdrop);
     color: var(--ink);
     font-family: "IBM Plex Sans", system-ui, sans-serif;
-    line-height: 1.45;
+    line-height: 1.4;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, .big { font-family: "Oswald", sans-serif; font-weight: 600; letter-spacing: .01em; margin: 0; }
-  .mono { font-family: "IBM Plex Mono", monospace; }
   p { margin: 0; }
 
   /* ---------- Лента (телефон, по умолчанию) ---------- */
@@ -51,65 +49,72 @@
     border-top: 6px solid var(--ink);
     padding: 28px 20px 32px;
     position: relative;
-    display: flex; flex-direction: column; gap: 20px;
-    font-size: 16px;
+    display: flex; flex-direction: column; gap: 22px;
+    font-size: 19px;
   }
-  .slide h2 { font-size: 30px; line-height: 1.1; }
-  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--coral); text-transform: uppercase; letter-spacing: .12em; }
-  .lead { font-size: 18px; color: var(--ink-2); max-width: 46ch; }
-  .pg { position: absolute; right: 20px; top: 26px; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-2); }
+  .slide h2 { font-size: 34px; line-height: 1.08; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--coral); text-transform: uppercase; letter-spacing: .12em; }
+  .lead { font-size: 21px; color: var(--ink-2); max-width: 30ch; }
+  .lead b { color: var(--ink); font-weight: 600; }
+  .pg { position: absolute; right: 20px; top: 26px; font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-2); }
 
-  .cols { display: grid; gap: 20px; }
-  .ledger { border-top: 2px solid var(--ink); }
-  .ledger .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
-  .ledger .row b { font-weight: 600; }
-  .ledger .row span { color: var(--ink-2); font-size: .9em; }
-  .ledger .row .hot { color: var(--coral); font-family: "IBM Plex Mono", monospace; font-size: .8em; }
-  .ledger .row.empty b, .ledger .row.empty span { color: var(--ink-2); opacity: .6; }
-
-  .facts { display: grid; gap: 0; border-top: 2px solid var(--ink); }
-  .facts div { padding: 14px 0; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
-  .facts .big { font-size: 38px; line-height: 1; color: var(--ink); }
-  .facts .big em { font-style: normal; color: var(--coral); }
-  .facts span { color: var(--ink-2); font-size: .92em; }
+  .cols { display: grid; gap: 22px; }
 
   .points { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
-  .points li { padding: 12px 0 12px 22px; border-bottom: 1px solid var(--line); position: relative; }
-  .points li::before { content: ""; position: absolute; left: 0; top: 21px; width: 10px; height: 2px; background: var(--coral); }
+  .points li { padding: 14px 0 14px 24px; border-bottom: 1px solid var(--line); position: relative; }
+  .points li::before { content: ""; position: absolute; left: 0; top: 27px; width: 12px; height: 3px; background: var(--coral); }
   .points li b { font-weight: 600; }
 
-  .note { border-left: 4px solid var(--coral); background: var(--coral-soft); padding: 14px 16px; font-size: .95em; }
-  .note b { color: var(--coral); }
-  code { font-family: "IBM Plex Mono", monospace; font-size: .88em; background: var(--surface); border: 1px solid var(--line); padding: 1px 6px; }
+  /* макет доски */
+  .ledger { border-top: 3px solid var(--ink); background: var(--surface); padding: 0 20px; }
+  .ledger .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .ledger .row:last-child { border-bottom: 0; }
+  .ledger .row b { font-weight: 600; }
+  .ledger .row span { color: var(--ink-2); font-size: .85em; }
+  .ledger .row .hot { color: var(--coral); font-weight: 600; }
+  .ledger .row.empty b, .ledger .row.empty span { color: var(--ink-2); opacity: .55; font-weight: 400; }
+  .ledger .task { grid-column: 1 / -1; font-size: .85em; color: var(--ink-2); margin-top: -4px; }
+
+  /* шаги сценария — это последовательность, поэтому с номерами */
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; counter-reset: s; border-top: 2px solid var(--ink); }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .steps li::before { content: counter(s); font-family: "Oswald", sans-serif; font-weight: 600; font-size: 1.5em; color: var(--coral); line-height: 1; }
+  .steps li b { font-weight: 600; }
+
+  /* было / стало */
+  .vs { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--ink); }
+  .vs > div { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--line); }
+  .vs > div:nth-child(2n) { padding-left: 16px; border-left: 2px solid var(--coral); font-weight: 600; }
+  .vs .h { font-family: "IBM Plex Mono", monospace; font-size: .6em; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-2); font-weight: 400 !important; }
+  .vs .h.c { color: var(--coral); }
+
+  .facts { display: grid; border-top: 2px solid var(--ink); }
+  .facts div { padding: 16px 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+  .facts .big { font-size: 44px; line-height: 1; }
+  .facts .big em { font-style: normal; color: var(--coral); }
+  .facts span { color: var(--ink-2); }
+  .facts .big { color: var(--ink); }
+  .facts.solo { grid-template-columns: 1fr !important; }
 
   .scroll { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
-  svg.diagram { width: 100%; height: auto; display: block; min-width: 720px; }
-  html.st .scroll { overflow: visible; margin: 0; padding: 0; }
-  html.st svg.diagram { min-width: 0; }
-  .facts.one { grid-template-columns: 1fr !important; }
+  svg.diagram { width: 100%; height: auto; display: block; min-width: 640px; }
   svg.diagram text { font-family: "IBM Plex Sans", sans-serif; fill: var(--ink); }
-  svg.diagram .m { font-family: "IBM Plex Mono", monospace; }
   svg.diagram .sub { fill: var(--ink-2); }
-  svg.diagram .box { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+  svg.diagram .box { fill: var(--surface); stroke: var(--ink); stroke-width: 3; }
   svg.diagram .box.c { stroke: var(--coral); }
-  svg.diagram .ln { stroke: var(--ink); stroke-width: 2; fill: none; }
+  svg.diagram .ln { stroke: var(--ink); stroke-width: 3; fill: none; }
   svg.diagram .ln.c { stroke: var(--coral); }
-  svg.diagram .ln.d { stroke-dasharray: 6 6; stroke: var(--ink-2); }
   svg.diagram .arr { fill: var(--ink); }
   svg.diagram .arr.c { fill: var(--coral); }
-  svg.diagram .arr.d { fill: var(--ink-2); }
   svg.diagram .cl { fill: var(--coral); }
 
-  /* титул */
   .title { background: var(--ink); color: #F5F6F8; border-top-color: var(--coral); }
-  .title .lead { color: #B9C0D4; }
   .title h1 { font-size: 46px; line-height: 1.02; }
   .title h1 em { font-style: normal; color: var(--coral); }
-  .title .who { font-size: 15px; color: #B9C0D4; display: grid; gap: 2px; }
+  .title .who { font-size: 17px; color: #B9C0D4; }
   .title .who b { color: #F5F6F8; font-weight: 600; }
-  .title .url { font-family: "IBM Plex Mono", monospace; font-size: 14px; color: #F5F6F8; border-bottom: 2px solid var(--coral); align-self: flex-start; }
+  .title .url { font-family: "IBM Plex Mono", monospace; font-size: 15px; color: #F5F6F8; border-bottom: 2px solid var(--coral); align-self: flex-start; }
   .title .pg { color: #8790AA; }
-
   .end h2 { font-size: 40px; }
 
   .hint { display: none; }
@@ -119,265 +124,198 @@
   html.st .deck {
     position: fixed; left: 50%; top: 50%;
     width: 1600px; height: 900px; padding: 0; max-width: none; margin: 0;
-    display: block;
-    transform-origin: 0 0;
+    display: block; transform-origin: 0 0;
   }
   html.st .slide {
     position: absolute; inset: 0;
-    padding: 88px 112px 80px;
-    gap: 40px;
-    font-size: 26px;
+    padding: 96px 120px 88px;
+    gap: 48px;
+    font-size: 36px;
     border-top-width: 12px;
     opacity: 0; visibility: hidden;
     transition: opacity .35s ease, visibility 0s linear .35s;
   }
   html.st .slide.on { opacity: 1; visibility: visible; transition: opacity .35s ease; }
-  html.st .slide h2 { font-size: 64px; }
-  html.st .kicker { font-size: 18px; }
-  html.st .lead { font-size: 30px; }
-  html.st .pg { right: 112px; top: 88px; font-size: 18px; }
-  html.st .cols { grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; flex: 1; }
-  html.st .cols.w { grid-template-columns: 1.35fr 1fr; }
-  html.st .cols.n { grid-template-columns: 1fr 1.35fr; }
-  html.st .ledger .row { padding: 16px 0; }
-  html.st .facts { grid-template-columns: 1fr 1fr; column-gap: 56px; }
-  html.st .facts div { padding: 22px 0; }
-  html.st .facts .big { font-size: 64px; }
-  html.st .points li { padding: 16px 0 16px 32px; }
-  html.st .points li::before { top: 33px; width: 14px; height: 3px; }
-  html.st .note { padding: 20px 24px; border-left-width: 6px; }
-  html.st .title { padding: 120px 112px; justify-content: center; gap: 44px; }
-  html.st .title h1 { font-size: 112px; }
-  html.st .title .who { font-size: 24px; }
-  html.st .title .url { font-size: 24px; }
-  html.st .end h2 { font-size: 88px; }
+  html.st .slide h2 { font-size: 76px; }
+  html.st .kicker { font-size: 20px; }
+  html.st .lead { font-size: 40px; max-width: 44ch; }
+  html.st .pg { right: 120px; top: 96px; font-size: 20px; }
+  html.st .cols { grid-template-columns: 1fr 1fr; gap: 88px; align-items: start; }
+  html.st .points li { padding: 20px 0 20px 40px; }
+  html.st .points li::before { top: 44px; width: 18px; height: 4px; }
+  html.st .ledger { padding: 0 32px; }
+  html.st .ledger .row { padding: 18px 0; }
+  html.st .steps li { grid-template-columns: 72px 1fr; padding: 22px 0; }
+  html.st .vs > div { padding: 18px 24px 18px 0; }
+  html.st .vs > div:nth-child(2n) { padding-left: 32px; }
+  html.st .facts { grid-template-columns: 1fr 1fr; column-gap: 88px; }
+  html.st .facts div { padding: 26px 0; }
+  html.st .facts .big { font-size: 96px; }
+  html.st .scroll { overflow: visible; margin: 0; padding: 0; }
+  html.st svg.diagram { min-width: 0; }
+  html.st .title { padding: 120px; justify-content: center; gap: 48px; }
+  html.st .title h1 { font-size: 120px; }
+  html.st .title .who { font-size: 28px; }
+  html.st .title .url { font-size: 28px; }
+  html.st .end h2 { font-size: 96px; }
   html.st .hint {
     display: block; position: fixed; left: 16px; bottom: 12px;
     font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); opacity: .7;
+  }
+
+  /* ---------- Печать в PDF: каждый слайд — страница 1600×900 ---------- */
+  @page { size: 1600px 900px; margin: 0; }
+  @media print {
+    html.st, html.st body { height: auto; overflow: visible; }
+    body { background: var(--bg); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html.st .deck { position: static; transform: none !important; height: auto; }
+    html.st .slide { position: relative; inset: auto; width: 1600px; height: 900px; opacity: 1; visibility: visible; transition: none; break-after: page; }
+    html.st .slide:last-child { break-after: auto; }
+    .hint { display: none !important; }
   }
 </style>
 </head>
 <body>
 <main class="deck" id="deck">
 
-  <!-- 1 -->
   <section class="slide title">
     <span class="pg">1</span>
     <span class="kicker">Защита проекта · МУКР</span>
-    <h1>«Что задали» —<br>доска домашних<br>заданий <em>группы</em></h1>
-    <p class="lead">Одна ссылка, на которой видно всё, что задали по каждому предмету, со сроками и фото доски.</p>
-    <div class="who">
-      <span><b>Махмудов Дияр</b> · ПИ-2</span>
-      <span>Сентябрь–октябрь 2026</span>
-    </div>
+    <h1>«Что задали» —<br>все домашки группы<br>на <em>одной странице</em></h1>
+    <div class="who"><b>Махмудов Дияр</b> · ПИ-2</div>
     <span class="url">seinokojii.github.io/mukr-homework</span>
   </section>
 
-  <!-- 2 -->
   <section class="slide">
     <span class="pg">2</span>
     <span class="kicker">Проблема</span>
-    <h2>Задания тонут в чате</h2>
-    <div class="cols">
-      <ul class="points">
-        <li>Задание пишут в общий чат, через час его <b>не найти</b> под сотней сообщений.</li>
-        <li>Фото доски приходят без подписи: <b>какой предмет и к какому сроку</b>, непонятно.</li>
-        <li>Кто пропустил пару, спрашивает каждого по отдельности.</li>
-        <li>У каждого из 11 предметов свой ритм, общей картины нет.</li>
-      </ul>
-      <div class="note"><b>Цель.</b> Одна страница без регистрации: открыл и сразу видишь, что задано, к какому сроку и с какими материалами.</div>
-    </div>
+    <h2>Домашку ищут в чате</h2>
+    <ul class="points">
+      <li>Задание тонет под сотней сообщений</li>
+      <li>Фото доски приходят без подписи</li>
+      <li>Кто болел, тот спрашивает у всех подряд</li>
+    </ul>
   </section>
 
-  <!-- 3 -->
   <section class="slide">
     <span class="pg">3</span>
     <span class="kicker">Решение</span>
-    <h2>Ведомость, а не лента</h2>
-    <div class="cols w">
+    <h2>Одна ссылка — и всё видно</h2>
+    <div class="cols">
       <div class="ledger" aria-label="Как выглядит доска">
-        <div class="row"><b>Математика</b><span class="hot">через 2 дня</span></div>
-        <div class="row"><b>Информатика</b><span>конспект · 5 фото</span></div>
-        <div class="row"><b>Физика</b><span class="hot">завтра</span></div>
-        <div class="row empty"><b>Вышмат</b><span>ничего не задано</span></div>
-        <div class="row empty"><b>Английский</b><span>ничего не задано</span></div>
+        <div class="row"><b>Математика</b><span class="hot">завтра</span><span class="task">№ 145–150</span></div>
+        <div class="row"><b>Информатика</b><span>5 фото</span></div>
+        <div class="row"><b>Физика</b><span class="hot">через 2 дня</span></div>
+        <div class="row empty"><b>Вышмат</b><span>не задано</span></div>
       </div>
       <ul class="points">
-        <li><b>11 предметов</b> строками в постоянном порядке, глаз ищет по месту.</li>
-        <li>Срок пишется словами: «завтра», «через 2 дня».</li>
-        <li>К заданию можно приложить фото и документы.</li>
-        <li>Смотреть может любой, а <b>записывает только староста</b>.</li>
+        <li>Все <b>11 предметов</b> списком</li>
+        <li>Срок словами: «завтра»</li>
+        <li>Фото доски в задании</li>
       </ul>
     </div>
   </section>
 
-  <!-- 4 -->
   <section class="slide">
     <span class="pg">4</span>
-    <span class="kicker">Архитектура</span>
-    <h2>Сайт без сервера</h2>
-    <div class="scroll"><svg class="diagram" viewBox="0 0 1376 420" role="img" aria-label="Схема: браузер читает с GitHub Pages и пишет через Contents API в репозиторий">
-      <defs>
-        <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="arr" d="M0 0L10 5L0 10z"/></marker>
-        <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="arr c" d="M0 0L10 5L0 10z"/></marker>
-      </defs>
-      <rect class="box" x="0" y="130" width="300" height="160"/>
-      <text x="24" y="182" font-size="30" font-weight="600">Браузер</text>
-      <text class="sub" x="24" y="220" font-size="20">index.html + board.js</text>
-      <text class="sub" x="24" y="250" font-size="20">телефон или ноутбук</text>
-
-      <rect class="box" x="538" y="0" width="300" height="140"/>
-      <text x="562" y="50" font-size="30" font-weight="600">GitHub Pages</text>
-      <text class="sub" x="562" y="88" font-size="20">раздаёт страницу,</text>
-      <text class="sub" x="562" y="116" font-size="20">фото и данные</text>
-
-      <rect class="box c" x="538" y="280" width="300" height="140"/>
-      <text x="562" y="330" font-size="30" font-weight="600">Contents API</text>
-      <text class="sub" x="562" y="368" font-size="20">чтение без задержки</text>
-      <text class="sub" x="562" y="396" font-size="20">и запись по токену</text>
-
-      <rect class="box" x="1076" y="110" width="300" height="200"/>
-      <text x="1100" y="160" font-size="30" font-weight="600">Репозиторий</text>
-      <text class="m" x="1100" y="204" font-size="20">homework.json</text>
-      <text class="m" x="1100" y="236" font-size="20">files/&lt;предмет&gt;/</text>
-      <text class="m" x="1100" y="268" font-size="20">token.enc</text>
-
-      <path class="ln" d="M538 70 H460 V170 H300" marker-end="url(#a)"/>
-      <text class="sub" x="314" y="158" font-size="18">читают все</text>
-      <path class="ln c" d="M300 250 H460 V350 H538" marker-end="url(#ac)"/>
-      <text x="314" y="240" font-size="18" class="cl">пишет староста</text>
-      <path class="ln" d="M1076 160 H1046 V70 H838" marker-end="url(#a)"/>
-      <path class="ln c" d="M838 350 H1046 V260 H1076" marker-end="url(#ac)"/>
-      <text class="sub" x="856" y="58" font-size="18">пересборка ~1 мин</text>
-      <text x="856" y="338" font-size="18" class="cl">коммит = сохранение</text>
-    </svg></div>
-    <p class="lead">База данных — обычный JSON-файл в Git. Каждое сохранение становится коммитом, поэтому история правок и откат есть бесплатно.</p>
+    <span class="kicker">Пользователи</span>
+    <h2>Кто и что делает</h2>
+    <div class="cols">
+      <div class="facts solo">
+        <div><span class="big">Студенты</span><span>открывают ссылку и смотрят</span></div>
+      </div>
+      <div class="facts solo">
+        <div><span class="big"><em>Староста</em></span><span>записывает задания по паролю</span></div>
+      </div>
+    </div>
+    <p class="lead">Без регистрации и приложений. <b>Работает в любом браузере</b>, с телефона тоже.</p>
   </section>
 
-  <!-- 5 -->
   <section class="slide">
     <span class="pg">5</span>
-    <span class="kicker">Безопасность</span>
-    <h2>Пароль не проверяется, а расшифровывает</h2>
-    <div class="scroll"><svg class="diagram" viewBox="0 0 1376 220" role="img" aria-label="Пароль через PBKDF2 даёт ключ, ключ расшифровывает token.enc в AES-GCM, получается токен записи">
-      <defs>
-        <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path class="arr" d="M0 0L10 5L0 10z"/></marker>
-      </defs>
-      <rect class="box" x="0" y="40" width="220" height="120"/>
-      <text x="22" y="92" font-size="28" font-weight="600">Пароль</text>
-      <text class="sub" x="22" y="128" font-size="19">знает староста</text>
-
-      <rect class="box" x="300" y="40" width="300" height="120"/>
-      <text class="m" x="322" y="92" font-size="24">PBKDF2-SHA256</text>
-      <text class="sub" x="322" y="128" font-size="19">200 000 итераций</text>
-
-      <rect class="box" x="680" y="40" width="320" height="120"/>
-      <text class="m" x="702" y="92" font-size="24">AES-256-GCM</text>
-      <text class="sub" x="702" y="128" font-size="19">расшифровка token.enc</text>
-
-      <rect class="box c" x="1080" y="40" width="296" height="120"/>
-      <text x="1102" y="92" font-size="28" font-weight="600">Токен записи</text>
-      <text class="sub" x="1102" y="128" font-size="19">только в этой вкладке</text>
-
-      <path class="ln" d="M220 100 H296" marker-end="url(#b)"/>
-      <path class="ln" d="M600 100 H676" marker-end="url(#b)"/>
-      <path class="ln" d="M1000 100 H1076" marker-end="url(#b)"/>
-      <text class="sub" x="300" y="200" font-size="19">Неверный пароль → GCM отвергает тег → ничего не открывается</text>
-    </svg></div>
-    <div class="cols">
-      <ul class="points">
-        <li>На статическом хостинге <b>негде хранить эталон</b> пароля, поэтому я его и не храню.</li>
-        <li>Репозиторий публичный, и в нём лежит только шифртекст.</li>
-      </ul>
-      <ul class="points">
-        <li>Токен fine-grained: <b>один репозиторий</b>, право только Contents.</li>
-        <li>Хранится в <code>sessionStorage</code> и пропадает, когда вкладку закрывают.</li>
-      </ul>
-    </div>
+    <span class="kicker">Сценарий студента</span>
+    <h2>Узнать домашку за 10 секунд</h2>
+    <ol class="steps">
+      <li><span>Открыл ссылку из закрепа группы</span></li>
+      <li><span>Нашёл свой предмет в списке</span></li>
+      <li><span>Увидел задание, <b>срок</b> и фото доски</span></li>
+    </ol>
   </section>
 
-  <!-- 6 -->
   <section class="slide">
     <span class="pg">6</span>
-    <span class="kicker">Надёжность записи</span>
-    <h2>Две вкладки не затирают друг друга</h2>
-    <div class="cols">
-      <ul class="points">
-        <li>Сохранение — <code>PUT</code> с <code>sha</code> той версии файла, которую видел пишущий.</li>
-        <li>Если файл успел измениться, GitHub отвечает <b>409</b>, и запись повторяется поверх свежей версии.</li>
-        <li>Состояние и <code>sha</code> берутся <b>из одного ответа API</b>.</li>
-      </ul>
-      <div class="note"><b>Ошибка, на которой я учился.</b> Сначала данные читались с raw-сервера, а версия — из API. raw отстаёт на минуты, и сохранение из одной вкладки стирало свежую запись из другой. Исправил: всё берётся из одного источника, затёртую запись восстановил из истории Git.</div>
-    </div>
+    <span class="kicker">Сценарий старосты</span>
+    <h2>Записать задание</h2>
+    <ol class="steps">
+      <li><span>Ввёл пароль</span></li>
+      <li><span>Вписал задание и срок, прикрепил фото</span></li>
+      <li><span>Сохранил, и <b>вся группа сразу видит</b></span></li>
+    </ol>
   </section>
 
-  <!-- 7 -->
   <section class="slide">
     <span class="pg">7</span>
-    <span class="kicker">Вложения</span>
-    <h2>Фото доски прямо в задании</h2>
-    <div class="cols n">
-      <div class="facts one">
-        <div><span class="big">1600<em>px</em></span><span>длинная сторона фото: сжатие в браузере до JPEG</span></div>
-        <div><span class="big">25<em> МБ</em></span><span>предел документа</span></div>
-      </div>
-      <ul class="points">
-        <li>Файл кладётся в <code>files/&lt;предмет&gt;/</code> тем же API, что и задание.</li>
-        <li>Почему 25 МБ: base64 раздувает файл на 33%, а тело запроса ограничено 50 МБ. Реальный потолок около 37 МБ, 25 взято с запасом.</li>
-        <li>В одну ветку пишу <b>строго по очереди</b>: параллельные загрузки дают 409.</li>
-      </ul>
+    <span class="kicker">Сравнение</span>
+    <h2>Чат против доски</h2>
+    <div class="vs">
+      <div class="h">Чат группы</div><div class="h c">«Что задали»</div>
+      <div>Листать вверх</div><div>Один список</div>
+      <div>Фото без подписи</div><div>Фото внутри задания</div>
+      <div>Срок надо помнить</div><div>«Завтра» прямо в строке</div>
     </div>
   </section>
 
-  <!-- 8 -->
   <section class="slide">
     <span class="pg">8</span>
-    <span class="kicker">Работает у всех</span>
-    <h2>Учёл блокировки и кеш</h2>
-    <div class="cols">
-      <ul class="points">
-        <li>У части провайдеров заблокирован <code>raw.githubusercontent.com</code>: страница открывалась, а фото оставались пустыми.</li>
-        <li>Теперь фото и данные <b>раздаёт сам сайт</b> (github.io), а raw остаётся запасным путём через <code>onerror</code>.</li>
-      </ul>
-      <ul class="points">
-        <li>Браузеры держали старый скрипт, поэтому он подключается как <code>board.js?v=&lt;хеш&gt;</code>.</li>
-        <li>Хеш пересчитывает <code>bump.py</code> перед коммитом.</li>
-        <li>Тёмная тема по системе, вёрстка под телефон.</li>
-      </ul>
-    </div>
+    <span class="kicker">Как устроено</span>
+    <h2>Сайт без своего сервера</h2>
+    <div class="scroll"><svg class="diagram" viewBox="0 0 1360 300" role="img" aria-label="Студенты смотрят страницу на GitHub, староста по паролю пишет задания туда же">
+      <defs>
+        <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="arr" d="M0 0L10 5L0 10z"/></marker>
+        <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="arr c" d="M0 0L10 5L0 10z"/></marker>
+      </defs>
+      <rect class="box" x="0" y="20" width="340" height="110"/>
+      <text x="30" y="88" font-size="36" font-weight="600">Студенты</text>
+      <rect class="box c" x="0" y="170" width="340" height="110"/>
+      <text x="30" y="238" font-size="36" font-weight="600">Староста</text>
+
+      <rect class="box" x="900" y="80" width="460" height="140"/>
+      <text x="930" y="142" font-size="36" font-weight="600">GitHub</text>
+      <text class="sub" x="930" y="186" font-size="26">страница + задания в файле</text>
+
+      <path class="ln" d="M900 120 H350" marker-end="url(#a)"/>
+      <text class="sub" x="440" y="105" font-size="26">смотрят страницу</text>
+      <path class="ln c" d="M340 225 H890" marker-end="url(#ac)"/>
+      <text class="cl" x="440" y="210" font-size="26">пишет по паролю</text>
+    </svg></div>
+    <ul class="points">
+      <li>HTML, CSS и JavaScript, хостинг <b>бесплатный</b></li>
+      <li>Пароль защищён шифрованием прямо в браузере</li>
+    </ul>
   </section>
 
-  <!-- 9 -->
   <section class="slide">
     <span class="pg">9</span>
-    <span class="kicker">Итог в цифрах</span>
-    <h2>Маленький стек, полный цикл</h2>
+    <span class="kicker">Результат</span>
+    <h2>Работает с сентября</h2>
     <div class="facts">
-      <div><span class="big">0<em> сом</em></span><span>хостинг и база: GitHub Pages + репозиторий</span></div>
-      <div><span class="big">~1100</span><span>строк: HTML, CSS, чистый JavaScript, два скрипта на Python</span></div>
-      <div><span class="big">0</span><span>библиотек: шифрование на встроенном Web Crypto API</span></div>
-      <div><span class="big">65</span><span>коммитов с 19.09.2026, каждое сохранение — коммит</span></div>
+      <div><span class="big">11</span><span>предметов на одной странице</span></div>
+      <div><span class="big">20</span><span>заданий записано с 19.09.2026</span></div>
+      <div><span class="big">0<em> сом</em></span><span>стоит хостинг</span></div>
+      <div><span class="big">0</span><span>регистраций для студентов</span></div>
     </div>
   </section>
 
-  <!-- 10 -->
   <section class="slide end">
     <span class="pg">10</span>
-    <span class="kicker">Ограничения и развитие</span>
-    <h2>Что дальше</h2>
-    <div class="cols">
-      <ul class="points">
-        <li>Токен истекает <b>18.09.2027</b>, его нужно перевыпустить через <code>set-token.py</code>.</li>
-        <li>Пишет один человек, пароль общий на всех пишущих.</li>
-        <li>Записи идут по очереди, поэтому массовая загрузка медленная.</li>
-      </ul>
-      <ul class="points">
-        <li>Уведомления о новом задании в Telegram.</li>
-        <li>Отдельные пароли для нескольких старост.</li>
-        <li>Архив прошлых заданий по неделям.</li>
-      </ul>
-    </div>
-    <p class="lead">Спасибо за внимание. Готов ответить на вопросы.</p>
+    <span class="kicker">Дальше</span>
+    <h2>Что добавить</h2>
+    <ul class="points">
+      <li>Уведомление в Telegram о новом задании</li>
+      <li>Несколько старост со своими паролями</li>
+      <li>Архив прошлых заданий</li>
+    </ul>
+    <p class="lead">Спасибо! Готов ответить на вопросы.</p>
   </section>
 
 </main>
