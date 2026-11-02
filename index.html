@@ -191,6 +191,26 @@
     .row { grid-template-columns: 1fr; gap: 8px; padding-block: 14px; }
     .subj { flex-direction: row; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   }
+
+  /* редактор кода */
+  #ce { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--surface); color: var(--ink);
+    border-top: 3px solid var(--coral); box-shadow: 0 -8px 30px rgba(0,0,0,.3); max-height: 64vh; overflow: auto;
+    padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px)); font-size: 16px; }
+  #ce[hidden] { display: none; }
+  .ce-in { max-width: 760px; margin: 0 auto; }
+  .ce-hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .ce-ttl { font-family: Oswald, sans-serif; text-transform: uppercase; letter-spacing: .03em; font-size: 20px; }
+  #ce label { display: block; font-size: 13px; margin: 12px 0 4px; color: var(--ink-2); font-family: "IBM Plex Mono", monospace; }
+  #ce select, #ce input.ce-val, #ce textarea.ce-val { font: inherit; width: 100%; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  #ce .btn { min-height: 44px; }
+  .ce-cw { position: relative; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); overflow: hidden; }
+  .ce-band { position: absolute; left: 0; right: 0; top: 0; height: 22px; background: var(--coral-soft); border-left: 3px solid var(--coral); pointer-events: none; }
+  .ce-code { position: relative; display: block; width: 100%; height: 210px; margin: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink);
+    font: 13px/22px "IBM Plex Mono", ui-monospace, monospace; padding: 8px 10px; white-space: pre; overflow: auto; resize: vertical; tab-size: 2; }
+  .ce-msg { margin: 10px 0 0; font-size: 13.5px; min-height: 20px; color: var(--ink-2); }
+  .ce-msg.err { color: var(--coral); font-weight: 600; }
+  .ce-msg.ok { color: var(--ok); font-weight: 600; }
+  body.editing { padding-bottom: 64vh; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   a { color: var(--coral); }
   .board { min-height: 120px; }
@@ -264,6 +284,6 @@
   </div>
 </dialog>
 
-<script src="board.js?v=14350bda"></script>
+<script src="board.js?v=3cc1e317"></script>
 </body>
 </html>
