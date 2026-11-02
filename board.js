@@ -135,7 +135,8 @@
         try {
           var parsed = JSON.parse(b64decode(d.content));
           if (!parsed || !parsed.subjects) return false;
-          var changed = JSON.stringify(parsed.subjects) !== JSON.stringify(state.subjects);
+          var changed = JSON.stringify(parsed.subjects) !== JSON.stringify(state.subjects) ||
+            JSON.stringify(parsed.hidden || []) !== JSON.stringify(state.hidden || []);
           state = parsed;
           // не перерисовываем поверх открытого редактора — иначе пропадёт набранный текст
           var editing = Object.keys(open).some(function (k) { return open[k]; });
@@ -161,6 +162,7 @@
     SUBJECTS.forEach(function (s) {
       if (state.subjects[s.id]) next.subjects[s.id] = state.subjects[s.id];
     });
+    if (hiddenList().length) next.hidden = hiddenList();
     var clean = (text || "").trim();
     atts = atts || [];
     if (clean || atts.length) {
@@ -218,6 +220,72 @@
     }).then(function () { saving = false; });
   }
 
+
+  // --- скрытые предметы --------------------------------------------------------
+  // Предмет не удаляется: id попадает в "hidden" файла homework.json, поэтому
+  // его можно вернуть, а задания и файлы остаются на месте.
+  function hiddenList() {
+    return (state.hidden || []).filter(function (id) {
+      return SUBJECTS.some(function (s) { return s.id === id; });
+    });
+  }
+  function visibleSubjects() {
+    var h = hiddenList();
+    return SUBJECTS.filter(function (s) { return h.indexOf(s.id) < 0; });
+  }
+
+  function setHidden(id, hide, retried) {
+    if (saving) return;
+    var name = SUBJECTS.filter(function (s) { return s.id === id; })[0].name;
+    var next = { subjects: state.subjects, updated: Date.now() };
+    var h = hiddenList().filter(function (x) { return x !== id; });
+    if (hide) h.push(id);
+    if (h.length) next.hidden = h;
+
+    var payload = {
+      message: (hide ? "Предмет убран: " : "Предмет возвращён: ") + id,
+      content: b64encode(JSON.stringify(next, null, 2) + "\n"),
+      branch: "main"
+    };
+    if (sha) payload.sha = sha;
+
+    saving = true;
+    toast("Сохраняю…");
+    fetch(API, {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer " + token,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (r.status === 401 || r.status === 403) throw { kind: "auth" };
+      if (r.status === 409 || r.status === 422) throw { kind: "conflict" };
+      if (!r.ok) throw { kind: "other" };
+      return r.json();
+    }).then(function (res) {
+      sha = res.content.sha;
+      state = next;
+      open[id] = false;
+      render();
+      toast(hide ? "Предмет «" + name + "» убран" : "Предмет «" + name + "» возвращён");
+    }).catch(function (e) {
+      saving = false;
+      if (e && e.kind === "auth") {
+        toast("Токен не принят: нужен доступ Contents: write");
+        setEditor(null);
+      } else if (e && e.kind === "conflict" && !retried) {
+        toast("Кто-то записал раньше — повторяю поверх свежей версии");
+        refreshFromApi(true).then(function () { setHidden(id, hide, true); });
+      } else if (e && e.kind === "conflict") {
+        toast("Не удалось сохранить: доску изменили одновременно");
+        refreshFromApi();
+      } else {
+        toast("Не удалось сохранить");
+      }
+    }).then(function () { saving = false; });
+  }
 
   // --- вложения --------------------------------------------------------------
   var MAX_DOC = 25 * 1024 * 1024;  // 25 МБ: выше ~37 МБ GitHub отклоняет запрос (base64 +33%)
@@ -436,7 +504,7 @@
   function render() {
     board.textContent = "";
 
-    var list = SUBJECTS.slice();
+    var list = visibleSubjects();
     if (onlyTasks) list = list.filter(function (s) { return has(state.subjects[s.id]) || open[s.id]; });
 
     if (!list.length) {
@@ -639,6 +707,16 @@
           ed.innerHTML = icon(active ? PENCIL : PLUS) + (active ? "Изменить" : "Записать");
           ed.onclick = function () { pending[s.id] = []; dropped[s.id] = []; open[s.id] = true; render(); };
           chips.appendChild(ed);
+          var hideBtn = document.createElement("button");
+          hideBtn.className = "btn danger";
+          hideBtn.textContent = "Убрать предмет";
+          hideBtn.title = "Скрыть предмет с доски; вернуть можно внизу страницы";
+          hideBtn.onclick = function () {
+            var msg = "Убрать предмет «" + s.name + "» с доски?" +
+              (active ? "\nЗадание и файлы сохранятся — предмет можно вернуть." : "\nПредмет можно вернуть внизу страницы.");
+            if (confirm(msg)) setHidden(s.id, true);
+          };
+          chips.appendChild(hideBtn);
         }
         if (chips.children.length) col.appendChild(chips);
       }
@@ -647,15 +725,37 @@
       board.appendChild(row);
     });
 
+    var restore = document.getElementById("restore");
+    if (restore) {
+      restore.textContent = "";
+      var hs = hiddenList();
+      restore.hidden = !(token && hs.length);
+      if (!restore.hidden) {
+        var lab = document.createElement("span");
+        lab.className = "chip plain";
+        lab.textContent = "Убраны:";
+        restore.appendChild(lab);
+        hs.forEach(function (id) {
+          var sub = SUBJECTS.filter(function (x) { return x.id === id; })[0];
+          var b = document.createElement("button");
+          b.className = "btn";
+          b.innerHTML = icon(PLUS) + sub.name;
+          b.title = "Вернуть предмет на доску";
+          b.onclick = function () { setHidden(id, false); };
+          restore.appendChild(b);
+        });
+      }
+    }
+
     var soon = null;
-    SUBJECTS.forEach(function (s) {
+    visibleSubjects().forEach(function (s) {
       var rec = state.subjects[s.id];
       if (!has(rec) || !rec.due) return;
       var d = daysLeft(rec.due);
       if (d === null || d < 0) return;
       if (!soon || d < soon.d) soon = { d: d, s: s, rec: rec };
     });
-    var count = SUBJECTS.filter(function (s) { return has(state.subjects[s.id]); }).length;
+    var count = visibleSubjects().filter(function (s) { return has(state.subjects[s.id]); }).length;
     if (soon) {
       nextEl.textContent = "";
       var pre = document.createTextNode("ближайшее: ");
