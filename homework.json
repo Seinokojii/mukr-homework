@@ -12,7 +12,38 @@
           "size": 110991
         }
       ]
+    },
+    "matematika": {
+      "text": "",
+      "due": "",
+      "updated": 1793594068974,
+      "files": [
+        {
+          "path": "files/matematika/1793594061540-IMG_6203.jpg",
+          "name": "IMG_6203.jpg",
+          "type": "image/jpeg",
+          "size": 23629
+        },
+        {
+          "path": "files/matematika/1793594063339-IMG_6204.jpg",
+          "name": "IMG_6204.jpg",
+          "type": "image/jpeg",
+          "size": 20057
+        },
+        {
+          "path": "files/matematika/1793594065015-IMG_6205.jpg",
+          "name": "IMG_6205.jpg",
+          "type": "image/jpeg",
+          "size": 28849
+        },
+        {
+          "path": "files/matematika/1793594066672-IMG_6206.jpg",
+          "name": "IMG_6206.jpg",
+          "type": "image/jpeg",
+          "size": 17598
+        }
+      ]
     }
   },
-  "updated": 1792990254896
+  "updated": 1793594068974
 }
