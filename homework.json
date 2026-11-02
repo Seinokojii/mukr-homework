@@ -1,18 +1,5 @@
 {
   "subjects": {
-    "informatika": {
-      "text": "конспект",
-      "due": "2026-10-08",
-      "updated": 1793594088572,
-      "files": [
-        {
-          "path": "files/informatika/1792990252510-_1_.jpg",
-          "name": "Снимок экрана (1).jpg",
-          "type": "image/jpeg",
-          "size": 110991
-        }
-      ]
-    },
     "matematika": {
       "text": "",
       "due": "",
@@ -45,5 +32,5 @@
       ]
     }
   },
-  "updated": 1793594088572
+  "updated": 1793594629128
 }
