@@ -136,7 +136,8 @@
           var parsed = JSON.parse(b64decode(d.content));
           if (!parsed || !parsed.subjects) return false;
           var changed = JSON.stringify(parsed.subjects) !== JSON.stringify(state.subjects) ||
-            JSON.stringify(parsed.hidden || []) !== JSON.stringify(state.hidden || []);
+            JSON.stringify(parsed.hidden || []) !== JSON.stringify(state.hidden || []) ||
+            JSON.stringify(parsed.custom || []) !== JSON.stringify(state.custom || []);
           state = parsed;
           // не перерисовываем поверх открытого редактора — иначе пропадёт набранный текст
           var editing = Object.keys(open).some(function (k) { return open[k]; });
@@ -159,10 +160,10 @@
 
   function writeRecord(id, text, due, atts, retried) {
     var next = { subjects: {}, updated: Date.now() };
-    SUBJECTS.forEach(function (s) {
+    allSubjects().forEach(function (s) {
       if (state.subjects[s.id]) next.subjects[s.id] = state.subjects[s.id];
     });
-    if (hiddenList().length) next.hidden = hiddenList();
+    keepMeta(next);
     var clean = (text || "").trim();
     atts = atts || [];
     if (clean || atts.length) {
@@ -224,31 +225,33 @@
   // --- скрытые предметы --------------------------------------------------------
   // Предмет не удаляется: id попадает в "hidden" файла homework.json, поэтому
   // его можно вернуть, а задания и файлы остаются на месте.
+  function allSubjects() { return SUBJECTS.concat(state.custom || []); }
+  function subjectById(id) { return allSubjects().filter(function (s) { return s.id === id; })[0]; }
   function hiddenList() {
-    return (state.hidden || []).filter(function (id) {
-      return SUBJECTS.some(function (s) { return s.id === id; });
-    });
+    return (state.hidden || []).filter(function (id) { return !!subjectById(id); });
   }
   function visibleSubjects() {
     var h = hiddenList();
-    return SUBJECTS.filter(function (s) { return h.indexOf(s.id) < 0; });
+    return allSubjects().filter(function (s) { return h.indexOf(s.id) < 0; });
+  }
+  // общие части файла, которые не должна потерять ни одна запись
+  function keepMeta(next) {
+    if (hiddenList().length) next.hidden = hiddenList();
+    if ((state.custom || []).length) next.custom = state.custom;
+    return next;
   }
 
-  function setHidden(id, hide, retried) {
+  // Одна запись файла с повтором при конфликте: состояние собирается заново
+  // из свежей версии, чтобы чужая запись не пропала.
+  function putNext(build, message, okMsg, retried) {
     if (saving) return;
-    var name = SUBJECTS.filter(function (s) { return s.id === id; })[0].name;
-    var next = { subjects: state.subjects, updated: Date.now() };
-    var h = hiddenList().filter(function (x) { return x !== id; });
-    if (hide) h.push(id);
-    if (h.length) next.hidden = h;
-
+    var next = build();
     var payload = {
-      message: (hide ? "Предмет убран: " : "Предмет возвращён: ") + id,
+      message: message,
       content: b64encode(JSON.stringify(next, null, 2) + "\n"),
       branch: "main"
     };
     if (sha) payload.sha = sha;
-
     saving = true;
     toast("Сохраняю…");
     fetch(API, {
@@ -267,9 +270,9 @@
     }).then(function (res) {
       sha = res.content.sha;
       state = next;
-      open[id] = false;
+      open = {};
       render();
-      toast(hide ? "Предмет «" + name + "» убран" : "Предмет «" + name + "» возвращён");
+      toast(okMsg);
     }).catch(function (e) {
       saving = false;
       if (e && e.kind === "auth") {
@@ -277,7 +280,7 @@
         setEditor(null);
       } else if (e && e.kind === "conflict" && !retried) {
         toast("Кто-то записал раньше — повторяю поверх свежей версии");
-        refreshFromApi(true).then(function () { setHidden(id, hide, true); });
+        refreshFromApi(true).then(function () { putNext(build, message, okMsg, true); });
       } else if (e && e.kind === "conflict") {
         toast("Не удалось сохранить: доску изменили одновременно");
         refreshFromApi();
@@ -285,6 +288,37 @@
         toast("Не удалось сохранить");
       }
     }).then(function () { saving = false; });
+  }
+
+  function setHidden(id, hide) {
+    var sub = subjectById(id);
+    putNext(function () {
+      var next = { subjects: state.subjects, updated: Date.now() };
+      var h = hiddenList().filter(function (x) { return x !== id; });
+      if (hide) h.push(id);
+      if (h.length) next.hidden = h;
+      if ((state.custom || []).length) next.custom = state.custom;
+      return next;
+    }, (hide ? "Предмет убран: " : "Предмет возвращён: ") + id,
+       hide ? "Предмет «" + sub.name + "» убран" : "Предмет «" + sub.name + "» возвращён");
+  }
+
+  function addSubject() {
+    var raw = prompt("Название нового предмета");
+    if (raw === null) return;
+    var name = raw.replace(/\s+/g, " ").trim().slice(0, 40);
+    if (!name) { toast("Название не может быть пустым"); return; }
+    var dup = allSubjects().some(function (s) {
+      return s.name.toLowerCase() === name.toLowerCase() || s.full.toLowerCase() === name.toLowerCase();
+    });
+    if (dup) { toast("Такой предмет уже есть — вернуть убранный можно внизу"); return; }
+    var id = "c" + Date.now().toString(36);
+    putNext(function () {
+      var next = { subjects: state.subjects, updated: Date.now() };
+      if (hiddenList().length) next.hidden = hiddenList();
+      next.custom = (state.custom || []).concat([{ id: id, name: name, full: "" }]);
+      return next;
+    }, "Предмет добавлен: " + name, "Предмет «" + name + "» добавлен");
   }
 
   // --- вложения --------------------------------------------------------------
@@ -728,22 +762,28 @@
     var restore = document.getElementById("restore");
     if (restore) {
       restore.textContent = "";
-      var hs = hiddenList();
-      restore.hidden = !(token && hs.length);
-      if (!restore.hidden) {
-        var lab = document.createElement("span");
-        lab.className = "chip plain";
-        lab.textContent = "Убраны:";
-        restore.appendChild(lab);
-        hs.forEach(function (id) {
-          var sub = SUBJECTS.filter(function (x) { return x.id === id; })[0];
-          var b = document.createElement("button");
-          b.className = "btn";
-          b.innerHTML = icon(PLUS) + sub.name;
-          b.title = "Вернуть предмет на доску";
-          b.onclick = function () { setHidden(id, false); };
-          restore.appendChild(b);
-        });
+      restore.hidden = !token;
+      if (token) {
+        var addBtn = document.createElement("button");
+        addBtn.className = "btn primary";
+        addBtn.innerHTML = icon(PLUS) + "Добавить предмет";
+        addBtn.onclick = addSubject;
+        restore.appendChild(addBtn);
+        var hs = hiddenList();
+        if (hs.length) {
+          var lab = document.createElement("span");
+          lab.className = "chip plain";
+          lab.textContent = "Убраны:";
+          restore.appendChild(lab);
+          hs.forEach(function (id) {
+            var b = document.createElement("button");
+            b.className = "btn";
+            b.innerHTML = icon(PLUS) + subjectById(id).name;
+            b.title = "Вернуть предмет на доску";
+            b.onclick = function () { setHidden(id, false); };
+            restore.appendChild(b);
+          });
+        }
       }
     }
 
