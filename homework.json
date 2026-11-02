@@ -2,8 +2,8 @@
   "subjects": {
     "informatika": {
       "text": "конспект",
-      "due": "2026-10-31",
-      "updated": 1792990254896,
+      "due": "2026-10-08",
+      "updated": 1793594088572,
       "files": [
         {
           "path": "files/informatika/1792990252510-_1_.jpg",
@@ -45,5 +45,5 @@
       ]
     }
   },
-  "updated": 1793594068974
+  "updated": 1793594088572
 }
